@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Assignment 4 - Payroll List</title>
+    <link rel="icon" type="image/png" href="cookie.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Shared homepage design (colors, sidebar, cards, theme toggle) -->
+    <link rel="stylesheet" href="Design.css">
+    <script src="theme.js"></script>
+
+    <style>
+        /* ================= Payroll page ================= */
+        .Payroll {
+            display: block;
+            max-width: 980px;
+            padding: 36px;
+            text-align: center;
+        }
+
+        .Payroll-Title {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            font-size: 28px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            border-image: var(--gradient) 1;
+        }
+
+        .Payroll-Subtitle {
+            margin-bottom: 28px;
+            font-size: 16px;
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        /* ----- Add form ----- */
+        .Form-Grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .Panel {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            padding: 14px 18px;
+            text-align: left;
+            background-color: var(--bg-menu);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            transition: border-color var(--ease), box-shadow var(--ease);
+        }
+
+        .Panel:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+
+        .Panel-Label {
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .Panel input {
+            width: 100%;
+            min-width: 0;
+            font-family: var(--font-main);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        .Panel input::placeholder { color: var(--text-muted); font-weight: 300; }
+
+        .Button-Row {
+            display: flex;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .Action {
+            flex: 1;
+            padding: 14px;
+            font-family: var(--font-main);
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            background: var(--gradient);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transition: transform var(--ease), box-shadow var(--ease);
+        }
+
+        .Action:hover,
+        .Action:focus-visible {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px var(--accent-glow);
+        }
+
+        .Action.Danger {
+            background: #d64545;
+            box-shadow: 0 4px 16px rgba(214, 69, 69, 0.35);
+        }
+
+        .Message {
+            min-height: 22px;
+            margin-top: 10px;
+            font-size: 15px;
+            color: #ff6b6b;
+            text-align: left;
+        }
+
+        .Message.ok { color: var(--accent); }
+
+        /* ----- Delete row ----- */
+        .Delete-Row {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .Delete-Row .Panel { flex: 1; }
+        .Delete-Row .Action { flex: 0 0 180px; }
+
+        /* ----- Table ----- */
+        .Table-Wrap {
+            margin-top: 28px;
+            overflow-x: auto;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+        }
+
+        .Payroll-Table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-main);
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .Payroll-Table th,
+        .Payroll-Table td {
+            padding: 12px 14px;
+            white-space: nowrap;
+            text-align: right;
+            border-top: 1px solid var(--border-strong);
+        }
+
+        .Payroll-Table th:first-child,
+        .Payroll-Table td:first-child {
+            text-align: center;
+        }
+
+        .Payroll-Table th:nth-child(2),
+        .Payroll-Table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .Payroll-Table thead th {
+            border-top: none;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background-color: var(--bg-menu);
+        }
+
+        .Payroll-Table td { font-weight: 300; }
+        .Payroll-Table td.net { font-weight: 600; color: var(--accent); }
+
+        .Payroll-Table td.empty-row {
+            padding: 28px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .Payroll-Table tfoot td {
+            font-weight: 600;
+            background-color: var(--accent-soft);
+        }
+
+        @media (max-width: 800px) {
+            .Payroll { padding: 28px 18px; }
+            .Payroll-Title { font-size: 24px; }
+            .Form-Grid { grid-template-columns: 1fr 1fr; }
+            .Form-Grid .Panel:first-child { grid-column: 1 / -1; }
+            .Delete-Row { flex-direction: column; }
+            .Delete-Row .Action { flex: none; }
+        }
+
+        /* ================= Collapsible sidebar (same as homepage) ================= */
+        .Home-Page {
+            position: relative;
+        }
+        .Menu-Bar {
+            width: 200px !important;
+            padding: 8px !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            transition: width 0.3s, padding 0.3s, visibility 0s linear 0s;
+        }
+        .Home-Page.sidebar-closed .Menu-Bar {
+            width: 0 !important;
+            padding: 0 !important;
+            visibility: hidden;
+            transition: width 0.3s, padding 0.3s, visibility 0s linear 0.3s;
+        }
+        .Menu-bar-buttons {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 10px !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+        .Menu-bar-buttons button {
+            font-size: 16px !important;
+            padding: 16px 14px !important;
+            width: 100% !important;
+            height: auto !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            white-space: nowrap;
+        }
+
+        /* Open / close arrow */
+        .Sidebar-Toggle {
+            position: absolute;
+            top: 50%;
+            left: 200px;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 36px;
+            height: 60px;
+            font-family: "Poppins", sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1;
+            color: var(--text);
+            background-color: var(--bg-menu);
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: left 0.3s, transform 0.3s, background-color 0.15s;
+        }
+        .Sidebar-Toggle:hover {
+            background-color: var(--accent);
+            color: var(--on-accent);
+        }
+        .Home-Page.sidebar-closed .Sidebar-Toggle {
+            left: 0;
+            transform: translate(0, -50%);
+        }
+        /* Menu icons */
+        .Menu-bar-buttons button {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .Menu-Icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Light / dark mode toggle -->
+    <button class="Theme-Toggle" id="themeToggle" type="button">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+    </button>
+
+    <div class="Home-Page" id="homePage">
+
+        <!-- Sidebar -->
+        <nav class="Menu-Bar" id="menuBar">
+            <div class="Menu-bar-buttons">
+                <button type="button" onclick="location.href='index.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+                    <b>Home</b>
+                </button>
+                <button type="button" onclick="location.href='A1.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg>
+                    <b>Assignment 1</b>
+                </button>
+                <button type="button" onclick="location.href='A2.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>
+                    <b>Assignment 2</b>
+                </button>
+                <button type="button" onclick="location.href='A3.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>
+                    <b>Assignment 3</b>
+                </button>
+                <button type="button" class="active" onclick="location.href='A4.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14c2.4.3 4 2 4 5"/></svg>
+                    <b>Assignment 4</b>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Open / close arrow -->
+        <button type="button" class="Sidebar-Toggle" id="sidebarToggle" aria-label="Close menu" aria-expanded="true" aria-controls="menuBar">&lt;</button>
+
+        <!-- Content -->
+        <main class="Content-Page-Background">
+            <section class="Intro Payroll">
+                <h1 class="Payroll-Title">Payroll List</h1>
+                <p class="Payroll-Subtitle">Add employees to the list, or delete one by its line number. Your list is saved automatically.</p>
+
+                <!-- Add employee -->
+                <form id="addForm" novalidate>
+                    <div class="Form-Grid">
+                        <div class="Panel">
+                            <label class="Panel-Label" for="empName">Employee Name</label>
+                            <input type="text" id="empName" placeholder="e.g. Juan Dela Cruz" autocomplete="off" autofocus>
+                        </div>
+                        <div class="Panel">
+                            <label class="Panel-Label" for="daysWorked">Days Worked</label>
+                            <input type="number" id="daysWorked" step="any" min="0" placeholder="0">
+                        </div>
+                        <div class="Panel">
+                            <label class="Panel-Label" for="dailyRate">Daily Rate</label>
+                            <input type="number" id="dailyRate" step="any" min="0" placeholder="0.00">
+                        </div>
+                        <div class="Panel">
+                            <label class="Panel-Label" for="deduction">Deduction Amount</label>
+                            <input type="number" id="deduction" step="any" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="Button-Row">
+                        <button type="submit" class="Action" id="addBtn">Add Employee</button>
+                    </div>
+                </form>
+
+                <p class="Message" id="addMessage" aria-live="polite"></p>
+
+                <!-- Delete employee -->
+                <div class="Delete-Row">
+                    <div class="Panel">
+                        <label class="Panel-Label" for="lineNo">Line Number to Delete</label>
+                        <input type="number" id="lineNo" step="1" min="1" placeholder="No.">
+                    </div>
+                    <button type="button" class="Action Danger" id="deleteBtn">Delete Line</button>
+                </div>
+
+                <p class="Message" id="deleteMessage" aria-live="polite"></p>
+
+                <!-- Payroll table -->
+                <div class="Table-Wrap">
+                    <table class="Payroll-Table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Employee Name</th>
+                                <th>Days Worked</th>
+                                <th>Daily Rate</th>
+                                <th>Gross Pay</th>
+                                <th>Deduction Amount</th>
+                                <th>Net Pay</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollBody"></tbody>
+                        <tfoot id="payrollFoot"></tfoot>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Open / close menu (runs first, independent of the program) -->
+    <script>
+        (function () {
+            var homePage = document.getElementById("homePage");
+            var sidebarToggle = document.getElementById("sidebarToggle");
+
+            sidebarToggle.addEventListener("click", function () {
+                var closed = homePage.classList.toggle("sidebar-closed");
+                sidebarToggle.innerHTML = closed ? "&gt;" : "&lt;";
+                sidebarToggle.setAttribute("aria-expanded", String(!closed));
+                sidebarToggle.setAttribute("aria-label", closed ? "Open menu" : "Close menu");
+            });
+        })();
+    </script>
+
+    <!-- Program -->
+    <script>
+        var STORAGE_KEY = "payrollList";
+
+        var addForm   = document.getElementById("addForm");
+        var nameEl    = document.getElementById("empName");
+        var daysEl    = document.getElementById("daysWorked");
+        var rateEl    = document.getElementById("dailyRate");
+        var dedEl     = document.getElementById("deduction");
+        var lineEl    = document.getElementById("lineNo");
+        var deleteBtn = document.getElementById("deleteBtn");
+        var addMsg    = document.getElementById("addMessage");
+        var delMsg    = document.getElementById("deleteMessage");
+        var bodyEl    = document.getElementById("payrollBody");
+        var footEl    = document.getElementById("payrollFoot");
+
+        // ----- Saving and loading -----
+        function loadEmployees() {
+            try {
+                var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (!Array.isArray(saved)) { return []; }
+
+                // Keep only entries that have the right shape
+                return saved.filter(function (e) {
+                    return e &&
+                           typeof e.name === "string" &&
+                           typeof e.days === "number" &&
+                           typeof e.rate === "number" &&
+                           typeof e.deduction === "number";
+                });
+            } catch (err) {
+                return [];
+            }
+        }
+
+        function saveEmployees() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(employees));
+            } catch (err) {
+                say(addMsg, "Could not save the list in this browser.");
+            }
+        }
+
+        var employees = loadEmployees();   // the payroll list
+
+        function peso(n) {
+            return "₱" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function say(el, text, ok) {
+            el.textContent = text;
+            el.classList.toggle("ok", !!ok);
+        }
+
+        // Builds one table cell with safe text
+        function cell(row, text, className) {
+            var td = document.createElement("td");
+            td.textContent = text;
+            if (className) { td.className = className; }
+            row.appendChild(td);
+        }
+
+        // Redraws the whole table (line numbers are always 1, 2, 3 ...)
+        function render() {
+            bodyEl.innerHTML = "";
+            footEl.innerHTML = "";
+
+            if (employees.length === 0) {
+                var empty = document.createElement("tr");
+                var td = document.createElement("td");
+                td.colSpan = 7;
+                td.className = "empty-row";
+                td.textContent = "No employees yet. Add one above.";
+                empty.appendChild(td);
+                bodyEl.appendChild(empty);
+                return;
+            }
+
+            var totalGross = 0, totalDed = 0, totalNet = 0;
+
+            employees.forEach(function (emp, i) {
+                var gross = emp.days * emp.rate;
+                var net   = gross - emp.deduction;
+
+                totalGross += gross;
+                totalDed   += emp.deduction;
+                totalNet   += net;
+
+                var tr = document.createElement("tr");
+                cell(tr, i + 1);
+                cell(tr, emp.name);
+                cell(tr, emp.days.toLocaleString("en-US"));
+                cell(tr, peso(emp.rate));
+                cell(tr, peso(gross));
+                cell(tr, peso(emp.deduction));
+                cell(tr, peso(net), "net");
+                bodyEl.appendChild(tr);
+            });
+
+            // Totals row
+            var foot = document.createElement("tr");
+            var label = document.createElement("td");
+            label.colSpan = 4;
+            label.textContent = "Total";
+            foot.appendChild(label);
+            cell(foot, peso(totalGross));
+            cell(foot, peso(totalDed));
+            cell(foot, peso(totalNet));
+            footEl.appendChild(foot);
+        }
+
+        // ----- Add -----
+        addForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            say(delMsg, "");
+
+            var name = nameEl.value.trim();
+
+            if (name === "") {
+                say(addMsg, "Please enter the employee name.");
+                nameEl.focus();
+                return;
+            }
+            if (daysEl.value.trim() === "" || daysEl.validity.badInput) {
+                say(addMsg, "Please enter the days worked.");
+                daysEl.focus();
+                return;
+            }
+            if (rateEl.value.trim() === "" || rateEl.validity.badInput) {
+                say(addMsg, "Please enter the daily rate.");
+                rateEl.focus();
+                return;
+            }
+            if (dedEl.validity.badInput) {
+                say(addMsg, "Deduction amount is not a valid number.");
+                dedEl.focus();
+                return;
+            }
+
+            var days = Number(daysEl.value);
+            var rate = Number(rateEl.value);
+            var deduction = dedEl.value.trim() === "" ? 0 : Number(dedEl.value);
+
+            if (days < 0 || rate < 0 || deduction < 0) {
+                say(addMsg, "Values cannot be negative.");
+                return;
+            }
+            if (deduction > days * rate) {
+                say(addMsg, "Deduction cannot be more than the gross pay (" + peso(days * rate) + ").");
+                dedEl.focus();
+                return;
+            }
+
+            // Re-read the saved list first, in case another tab changed it
+            employees = loadEmployees();
+            employees.push({ name: name, days: days, rate: rate, deduction: deduction });
+            saveEmployees();
+            render();
+
+            say(addMsg, name + " was added as line " + employees.length + ".", true);
+
+            nameEl.value = "";
+            daysEl.value = "";
+            rateEl.value = "";
+            dedEl.value  = "";
+            nameEl.focus();
+        });
+
+        // ----- Delete -----
+        deleteBtn.addEventListener("click", function () {
+            say(addMsg, "");
+
+            // Re-read the saved list first, in case another tab changed it
+            employees = loadEmployees();
+            render();
+
+            if (employees.length === 0) {
+                say(delMsg, "The list is empty. There is nothing to delete.");
+                return;
+            }
+            if (lineEl.value.trim() === "" || lineEl.validity.badInput) {
+                say(delMsg, "Please enter the line number to delete.");
+                lineEl.focus();
+                return;
+            }
+
+            var line = Number(lineEl.value);
+
+            if (!Number.isInteger(line) || line < 1 || line > employees.length) {
+                say(delMsg, "Line number must be a whole number from 1 to " + employees.length + ".");
+                lineEl.focus();
+                return;
+            }
+
+            var removed = employees.splice(line - 1, 1)[0];
+            saveEmployees();
+            render();
+
+            say(delMsg, "Line " + line + " (" + removed.name + ") was deleted.", true);
+            lineEl.value = "";
+        });
+
+        // Pressing Enter in the line number box also deletes
+        lineEl.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { deleteBtn.click(); }
+        });
+
+        // If another tab changes the list, update this tab right away
+        window.addEventListener("storage", function (e) {
+            if (e.key === STORAGE_KEY || e.key === null) {
+                employees = loadEmployees();
+                render();
+            }
+        });
+
+        render();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Assignment 3 - Loops</title>
+    <link rel="icon" type="image/png" href="cookie.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Shared homepage design (colors, sidebar, cards, theme toggle) -->
+    <link rel="stylesheet" href="Design.css">
+    <script src="theme.js"></script>
+
+    <style>
+        /* ================= Loops page ================= */
+        .Loops {
+            display: block;
+            max-width: 760px;
+            padding: 36px;
+            text-align: center;
+        }
+
+        .Loops-Title {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            font-size: 28px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            border-image: var(--gradient) 1;
+        }
+
+        .Loops-Subtitle {
+            margin-bottom: 28px;
+            font-size: 16px;
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        .Panel {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            padding: 18px 20px;
+            text-align: left;
+            background-color: var(--bg-menu);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            transition: border-color var(--ease), box-shadow var(--ease);
+        }
+
+        .Panel:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+
+        .Panel-Label {
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .Panel input {
+            width: 100%;
+            min-width: 0;
+            font-family: var(--font-main);
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text);
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        .Panel input::placeholder { color: var(--text-muted); font-weight: 300; }
+
+        .Message {
+            min-height: 22px;
+            margin-top: 12px;
+            font-size: 15px;
+            color: #ff6b6b;
+        }
+
+        /* ----- Result cards ----- */
+        .Results {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .Result-Card {
+            padding: 16px 20px;
+            text-align: left;
+            background-color: var(--accent-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .Result-Label {
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .Result-Loop {
+            font-size: 12px;
+            font-weight: 300;
+            color: var(--accent);
+        }
+
+        .Result-Value {
+            margin-top: 6px;
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--text);
+            word-break: break-all;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .Result-Value.empty {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 700px) {
+            .Loops { padding: 28px 18px; }
+            .Loops-Title { font-size: 24px; }
+            .Panel input { font-size: 26px; }
+            .Result-Value { font-size: 22px; }
+        }
+
+        /* ================= Collapsible sidebar (same as homepage) ================= */
+        .Home-Page {
+            position: relative;
+        }
+        .Menu-Bar {
+            width: 200px !important;
+            padding: 8px !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            transition: width 0.3s, padding 0.3s, visibility 0s linear 0s;
+        }
+        .Home-Page.sidebar-closed .Menu-Bar {
+            width: 0 !important;
+            padding: 0 !important;
+            visibility: hidden;
+            transition: width 0.3s, padding 0.3s, visibility 0s linear 0.3s;
+        }
+        .Menu-bar-buttons {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 10px !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+        .Menu-bar-buttons button {
+            font-size: 16px !important;
+            padding: 16px 14px !important;
+            width: 100% !important;
+            height: auto !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            white-space: nowrap;
+        }
+
+        /* Open / close arrow */
+        .Sidebar-Toggle {
+            position: absolute;
+            top: 50%;
+            left: 200px;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 36px;
+            height: 60px;
+            font-family: "Poppins", sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1;
+            color: var(--text);
+            background-color: var(--bg-menu);
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: left 0.3s, transform 0.3s, background-color 0.15s;
+        }
+        .Sidebar-Toggle:hover {
+            background-color: var(--accent);
+            color: var(--on-accent);
+        }
+        .Home-Page.sidebar-closed .Sidebar-Toggle {
+            left: 0;
+            transform: translate(0, -50%);
+        }
+        /* Menu icons */
+        .Menu-bar-buttons button {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .Menu-Icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Light / dark mode toggle -->
+    <button class="Theme-Toggle" id="themeToggle" type="button">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+    </button>
+
+    <div class="Home-Page" id="homePage">
+
+        <!-- Sidebar -->
+        <nav class="Menu-Bar" id="menuBar">
+            <div class="Menu-bar-buttons">
+                <button type="button" onclick="location.href='index.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+                    <b>Home</b>
+                </button>
+                <button type="button" onclick="location.href='A1.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg>
+                    <b>Assignment 1</b>
+                </button>
+                <button type="button" onclick="location.href='A2.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>
+                    <b>Assignment 2</b>
+                </button>
+                <button type="button" class="active" onclick="location.href='A3.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>
+                    <b>Assignment 3</b>
+                </button>
+                <button type="button" onclick="location.href='A4.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14c2.4.3 4 2 4 5"/></svg>
+                    <b>Assignment 4</b>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Open / close arrow -->
+        <button type="button" class="Sidebar-Toggle" id="sidebarToggle" aria-label="Close menu" aria-expanded="true" aria-controls="menuBar">&lt;</button>
+
+        <!-- Content -->
+        <main class="Content-Page-Background">
+            <section class="Intro Loops">
+                <h1 class="Loops-Title">Factorial, Sum and Average</h1>
+                <p class="Loops-Subtitle">Enter an integer n and the results update instantly.</p>
+
+                <!-- Input -->
+                <div class="Panel">
+                    <label class="Panel-Label" for="nValue">Integer n</label>
+                    <input type="number" id="nValue" step="1" min="1" placeholder="0" autofocus>
+                </div>
+
+                <p class="Message" id="message" aria-live="polite"></p>
+
+                <!-- Results -->
+                <div class="Results" aria-live="polite">
+                    <div class="Result-Card">
+                        <div class="Result-Label">1. The nth factorial</div>
+                        <div class="Result-Loop">Using a while loop</div>
+                        <div class="Result-Value empty" id="factResult">—</div>
+                    </div>
+                    <div class="Result-Card">
+                        <div class="Result-Label">2. Sum of the first n numbers</div>
+                        <div class="Result-Loop">Using a do while loop</div>
+                        <div class="Result-Value empty" id="sumResult">—</div>
+                    </div>
+                    <div class="Result-Card">
+                        <div class="Result-Label">3. Average of the first n numbers</div>
+                        <div class="Result-Loop">Using a for loop</div>
+                        <div class="Result-Value empty" id="avgResult">—</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Open / close menu (runs first, independent of the program) -->
+    <script>
+        (function () {
+            var homePage = document.getElementById("homePage");
+            var sidebarToggle = document.getElementById("sidebarToggle");
+
+            sidebarToggle.addEventListener("click", function () {
+                var closed = homePage.classList.toggle("sidebar-closed");
+                sidebarToggle.innerHTML = closed ? "&gt;" : "&lt;";
+                sidebarToggle.setAttribute("aria-expanded", String(!closed));
+                sidebarToggle.setAttribute("aria-label", closed ? "Open menu" : "Close menu");
+            });
+        })();
+    </script>
+
+    <!-- Program -->
+    <script>
+        var input   = document.getElementById("nValue");
+        var message = document.getElementById("message");
+        var factEl  = document.getElementById("factResult");
+        var sumEl   = document.getElementById("sumResult");
+        var avgEl   = document.getElementById("avgResult");
+
+        var MAX_N = 1000;   // keeps the factorial a reasonable size
+
+        // 1. Factorial using a WHILE loop (BigInt so big answers stay exact)
+        function factorial(n) {
+            var result = 1n;
+            var i = 1n;
+            while (i <= BigInt(n)) {
+                result = result * i;
+                i++;
+            }
+            return result;
+        }
+
+        // 2. Sum of the first n numbers using a DO WHILE loop
+        function sumFirstN(n) {
+            var sum = 0;
+            var i = 1;
+            do {
+                sum = sum + i;
+                i++;
+            } while (i <= n);
+            return sum;
+        }
+
+        // 3. Average of the first n numbers using a FOR loop
+        function averageFirstN(n) {
+            var total = 0;
+            for (var i = 1; i <= n; i++) {
+                total = total + i;
+            }
+            return total / n;
+        }
+
+        function setResult(el, text) {
+            el.textContent = text;
+            el.classList.remove("empty");
+        }
+
+        function clearResults() {
+            [factEl, sumEl, avgEl].forEach(function (el) {
+                el.textContent = "—";
+                el.classList.add("empty");
+            });
+        }
+
+        // Runs on every keystroke, so no button is needed
+        function compute() {
+            message.textContent = "";
+
+            // Empty box: just reset, no error message
+            if (input.value.trim() === "" && !input.validity.badInput) {
+                clearResults();
+                return;
+            }
+
+            if (input.validity.badInput) {
+                clearResults();
+                message.textContent = "Please enter a valid number.";
+                return;
+            }
+
+            var n = Number(input.value);
+
+            if (!Number.isInteger(n)) {
+                clearResults();
+                message.textContent = "n must be a whole number (an integer).";
+                return;
+            }
+            if (n < 1) {
+                clearResults();
+                message.textContent = "n must be 1 or greater.";
+                return;
+            }
+            if (n > MAX_N) {
+                clearResults();
+                message.textContent = "Please use an n of " + MAX_N + " or less.";
+                return;
+            }
+
+            setResult(factEl, factorial(n).toLocaleString("en-US"));
+            setResult(sumEl, sumFirstN(n).toLocaleString("en-US"));
+            setResult(avgEl, averageFirstN(n).toLocaleString("en-US", { maximumFractionDigits: 2 }));
+        }
+
+        input.addEventListener("input", compute);
+        compute();
+    </script>
+
+</body>
+</html>

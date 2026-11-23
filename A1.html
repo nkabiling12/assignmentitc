@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Assignment 1 - Unit Converter</title>
+    <link rel="icon" type="image/png" href="cookie.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Shared homepage design (colors, sidebar, cards, theme toggle) -->
+    <link rel="stylesheet" href="Design.css">
+    <script src="theme.js"></script>
+
+    <style>
+        /* ================= Converter ================= */
+        .Converter {
+            display: block;
+            max-width: 760px;
+            padding: 36px;
+            text-align: center;
+        }
+
+        .Converter-Title {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            font-size: 28px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            border-image: var(--gradient) 1;
+        }
+
+        .Converter-Subtitle {
+            margin-bottom: 28px;
+            font-size: 16px;
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        .Chips {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .Chip {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 12px 8px;
+            font-family: var(--font-main);
+            color: var(--text-muted);
+            background-color: var(--bg-menu);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background-color var(--ease), color var(--ease),
+                        border-color var(--ease), transform var(--ease),
+                        box-shadow var(--ease);
+        }
+
+        .Chip .chip-units { font-size: 17px; font-weight: 600; }
+        .Chip .chip-name  { font-size: 12px; font-weight: 300; }
+
+        .Chip:hover,
+        .Chip:focus-visible {
+            color: var(--text);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .Chip.selected {
+            color: #ffffff;
+            background: var(--gradient);
+            border-color: transparent;
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .Converter-Row {
+            display: flex;
+            align-items: stretch;
+            gap: 14px;
+        }
+
+        .Panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            padding: 18px 20px;
+            text-align: left;
+            background-color: var(--bg-menu);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            transition: border-color var(--ease), box-shadow var(--ease);
+        }
+
+        .Panel:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+
+        .Panel-Label {
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .Panel-Main {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .Panel input,
+        .Panel .Output {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+            font-family: var(--font-main);
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text);
+            background: none;
+            border: none;
+            outline: none;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .Panel input::placeholder { color: var(--text-muted); font-weight: 300; }
+        .Panel .Output.empty { color: var(--text-muted); font-weight: 300; }
+        .Panel .Output.error { font-size: 18px; color: #ff6b6b; }
+
+        .Panel .Unit {
+            flex-shrink: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .Panel-Result {
+            background-color: var(--accent-soft);
+            border-color: var(--border);
+        }
+
+        .Swap {
+            flex-shrink: 0;
+            align-self: center;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            color: #ffffff;
+            background: var(--gradient);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transition: transform 0.35s ease, box-shadow var(--ease);
+        }
+
+        .Swap:hover,
+        .Swap:focus-visible {
+            outline: none;
+            transform: rotate(180deg) scale(1.08);
+            box-shadow: 0 6px 22px var(--accent-glow);
+        }
+
+        .Formula {
+            margin-top: 22px;
+            font-size: 15px;
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        .Formula strong { font-weight: 400; color: var(--accent); }
+
+        @media (max-width: 700px) {
+            .Converter { padding: 28px 18px; }
+            .Converter-Title { font-size: 24px; }
+            .Chips { grid-template-columns: repeat(2, 1fr); }
+            .Converter-Row { flex-direction: column; }
+            .Swap { transform: rotate(90deg); }
+            .Swap:hover,
+            .Swap:focus-visible { transform: rotate(270deg) scale(1.08); }
+            .Panel input,
+            .Panel .Output { font-size: 26px; }
+        }
+
+        /* ================= Collapsible sidebar (same as homepage) ================= */
+        .Home-Page {
+            position: relative;
+        }
+        .Menu-Bar {
+            width: 200px !important;
+            padding: 8px !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            transition: width 0.3s, padding 0.3s, visibility 0s linear 0s;
+        }
+        .Home-Page.sidebar-closed .Menu-Bar {
+            width: 0 !important;
+            padding: 0 !important;
+            visibility: hidden;
+            transition: width 0.3s, padding 0.3s, visibility 0s linear 0.3s;
+        }
+        .Menu-bar-buttons {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 10px !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+        .Menu-bar-buttons button {
+            font-size: 16px !important;
+            padding: 16px 14px !important;
+            width: 100% !important;
+            height: auto !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            white-space: nowrap;
+        }
+
+        /* Open / close arrow */
+        .Sidebar-Toggle {
+            position: absolute;
+            top: 50%;
+            left: 200px;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 36px;
+            height: 60px;
+            font-family: "Poppins", sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1;
+            color: var(--text);
+            background-color: var(--bg-menu);
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: left 0.3s, transform 0.3s, background-color 0.15s;
+        }
+        .Sidebar-Toggle:hover {
+            background-color: var(--accent);
+            color: var(--on-accent);
+        }
+        .Home-Page.sidebar-closed .Sidebar-Toggle {
+            left: 0;
+            transform: translate(0, -50%);
+        }
+
+        /* Menu icons */
+        .Menu-bar-buttons button {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .Menu-Icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Light / dark mode toggle -->
+    <button class="Theme-Toggle" id="themeToggle" type="button">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+    </button>
+
+    <div class="Home-Page" id="homePage">
+
+        <!-- Sidebar -->
+        <nav class="Menu-Bar" id="menuBar">
+            <div class="Menu-bar-buttons">
+                <button type="button" onclick="location.href='index.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+                    <b>Home</b>
+                </button>
+                <button type="button" class="active" onclick="location.href='A1.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg>
+                    <b>Assignment 1</b>
+                </button>
+                <button type="button" onclick="location.href='A2.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>
+                    <b>Assignment 2</b>
+                </button>
+                <button type="button" onclick="location.href='A3.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>
+                    <b>Assignment 3</b>
+                </button>
+                <button type="button" onclick="location.href='A4.html'">
+                    <svg class="Menu-Icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14c2.4.3 4 2 4 5"/></svg>
+                    <b>Assignment 4</b>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Open / close arrow -->
+        <button type="button" class="Sidebar-Toggle" id="sidebarToggle" aria-label="Close menu" aria-expanded="true" aria-controls="menuBar">&lt;</button>
+
+        <!-- Content -->
+        <main class="Content-Page-Background">
+            <section class="Intro Converter">
+                <h1 class="Converter-Title">Unit Converter</h1>
+                <p class="Converter-Subtitle">Pick a conversion and start typing. The answer updates instantly.</p>
+
+                <!-- Conversion picker -->
+                <div class="Chips" role="radiogroup" aria-label="Conversion type">
+                    <button type="button" class="Chip selected" data-key="1" role="radio" aria-checked="true">
+                        <span class="chip-units">°F → °C</span>
+                        <span class="chip-name">Fahrenheit to Celsius</span>
+                    </button>
+                    <button type="button" class="Chip" data-key="2" role="radio" aria-checked="false">
+                        <span class="chip-units">°C → °F</span>
+                        <span class="chip-name">Celsius to Fahrenheit</span>
+                    </button>
+                    <button type="button" class="Chip" data-key="3" role="radio" aria-checked="false">
+                        <span class="chip-units">m → ft</span>
+                        <span class="chip-name">Meters to Feet</span>
+                    </button>
+                    <button type="button" class="Chip" data-key="4" role="radio" aria-checked="false">
+                        <span class="chip-units">ft → m</span>
+                        <span class="chip-name">Feet to Meters</span>
+                    </button>
+                </div>
+
+                <!-- From / To -->
+                <div class="Converter-Row">
+                    <div class="Panel">
+                        <label class="Panel-Label" for="value" id="fromLabel">Fahrenheit</label>
+                        <div class="Panel-Main">
+                            <input type="number" id="value" step="any" placeholder="0" autofocus>
+                            <span class="Unit" id="fromUnit">°F</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="Swap" id="swapBtn" title="Swap conversion" aria-label="Swap conversion">⇄</button>
+
+                    <div class="Panel Panel-Result">
+                        <span class="Panel-Label" id="toLabel">Celsius</span>
+                        <div class="Panel-Main" aria-live="polite">
+                            <span class="Output empty" id="result">—</span>
+                            <span class="Unit" id="toUnit">°C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="Formula" id="formula"></p>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Open / close menu (runs first, independent of the converter) -->
+    <script>
+        (function () {
+            var homePage = document.getElementById("homePage");
+            var sidebarToggle = document.getElementById("sidebarToggle");
+
+            sidebarToggle.addEventListener("click", function () {
+                var closed = homePage.classList.toggle("sidebar-closed");
+                sidebarToggle.innerHTML = closed ? "&gt;" : "&lt;";
+                sidebarToggle.setAttribute("aria-expanded", String(!closed));
+                sidebarToggle.setAttribute("aria-label", closed ? "Open menu" : "Close menu");
+            });
+        })();
+    </script>
+
+    <!-- Converter -->
+    <script>
+        var conversions = {
+            "1": { fromName: "Fahrenheit", toName: "Celsius",    from: "°F", to: "°C",
+                   formula: "°C = (°F − 32) × 5/9",
+                   fn: function (v) { return (v - 32) * 5 / 9; },  reverse: "2" },
+            "2": { fromName: "Celsius",    toName: "Fahrenheit", from: "°C", to: "°F",
+                   formula: "°F = (°C × 9/5) + 32",
+                   fn: function (v) { return (v * 9 / 5) + 32; },  reverse: "1" },
+            "3": { fromName: "Meters",     toName: "Feet",       from: "m",  to: "ft",
+                   formula: "ft = m × 3.28084",
+                   fn: function (v) { return v * 3.28084; },       reverse: "4" },
+            "4": { fromName: "Feet",       toName: "Meters",     from: "ft", to: "m",
+                   formula: "m = ft ÷ 3.28084",
+                   fn: function (v) { return v / 3.28084; },       reverse: "3" }
+        };
+
+        var current = "1";
+        var chips    = document.querySelectorAll(".Chip");
+        var input    = document.getElementById("value");
+        var result   = document.getElementById("result");
+        var swapBtn  = document.getElementById("swapBtn");
+
+        function getAnswer() {
+            if (input.validity.badInput) { return "bad"; }
+            var raw = input.value.trim();
+            if (raw === "" || isNaN(Number(raw))) { return null; }
+            return conversions[current].fn(Number(raw));
+        }
+
+        function update() {
+            var answer = getAnswer();
+            result.classList.remove("empty", "error");
+
+            if (answer === null) {
+                result.textContent = "—";
+                result.classList.add("empty");
+            } else if (answer === "bad") {
+                result.textContent = "Invalid number";
+                result.classList.add("error");
+            } else {
+                result.textContent = answer.toFixed(2);
+            }
+        }
+
+        function setConversion(key) {
+            current = key;
+            var c = conversions[key];
+
+            document.getElementById("fromLabel").textContent = c.fromName;
+            document.getElementById("toLabel").textContent   = c.toName;
+            document.getElementById("fromUnit").textContent  = c.from;
+            document.getElementById("toUnit").textContent    = c.to;
+            document.getElementById("formula").innerHTML     = "Formula: <strong>" + c.formula + "</strong>";
+
+            chips.forEach(function (chip) {
+                var on = chip.dataset.key === key;
+                chip.classList.toggle("selected", on);
+                chip.setAttribute("aria-checked", on ? "true" : "false");
+            });
+
+            update();
+        }
+
+        input.addEventListener("input", update);
+
+        chips.forEach(function (chip) {
+            chip.addEventListener("click", function () {
+                setConversion(chip.dataset.key);
+                input.focus();
+            });
+        });
+
+        swapBtn.addEventListener("click", function () {
+            var answer = getAnswer();
+            var next = conversions[current].reverse;
+
+            if (typeof answer === "number") {
+                input.value = answer.toFixed(2);
+            }
+            setConversion(next);
+            input.focus();
+        });
+
+        setConversion("1");
+    </script>
+
+</body>
+</html>
